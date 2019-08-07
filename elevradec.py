@@ -13,7 +13,7 @@ import sys
 
 telpos={}
 telpos["Subaru"]=[19.828611,155.48055,4139.]
-telpos["Ishigaki"]=[24.3666,124.1333,0.]
+telpos["Ishigaki"]=[24.3666,124.1333,197.]
 
 
 

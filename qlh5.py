@@ -615,6 +615,8 @@ if __name__ == "__main__":
 #    if True:
     try:
         print("Try to connect mysql server...")
+        print("Press CTRL-C if you are outside the tess tokyo network.")
+
         if TID>0 and not args.n:
             import mysql.connector
             from urllib.parse import urlparse

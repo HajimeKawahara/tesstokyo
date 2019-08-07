@@ -5,7 +5,7 @@ Some small tools for people working on TESS/FFI data sets in Tokyo.
 ### qlh5.py -- for Quick Look
 
 ```
-python qlh5.py -f data_you_wanna_analyze.h5
+python qlh5.py -f test.h5
 ```
 
 ### elevradec.py -- eleveation for follow-up obs...
