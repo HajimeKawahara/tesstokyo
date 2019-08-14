@@ -64,6 +64,7 @@ def explanation():
     exp.append("y: pixel difference image at two locations. put twice. (Y: move to right)")
     exp.append("t: pixel difference image at two ranges. put 2 (inside) 2+2 (outside) times.")
     exp.append("m: nearest pixel difference image at location (M: move to right)")
+    exp.append("k: show quality")
     exp.append("   ")
     exp.append("-------------------------------------")
     return exp
@@ -109,8 +110,8 @@ def oncpaint(event):
 #        masklc[maskbkgc]=False
         
     #setting pixel panel
-    ax2.clear()
     if event.key == "p":
+        ax2.clear()
         ax.clear()
         ind = np.searchsorted(time[mask], event.xdata, side='left')
         ax.plot(time[mask],flux[mask]/np.median(flux[mask]),".")
@@ -119,7 +120,22 @@ def oncpaint(event):
 
         ax2.imshow(np.log10(cnts[mask][ind]))
         ax2.title.set_text('Log color Image at t='+str(round(time[mask][ind])))
+
+    elif event.key == "k":
+        xlim=ax.get_xlim()
+        ylim=ax.get_ylim()
+        ax.clear()            
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
+        
+        for j,iq in enumerate(np.unique(quality)): 
+            qmask=quality==iq
+            ax.plot(time[qmask],flux[qmask]/np.median(flux[mask]),".",color="C"+str(j),label="Q="+str(iq))
+        ax.legend()
+
+
     elif event.key == "m":
+        ax2.clear()
         ax.clear()            
         ind = np.searchsorted(time[mask_qzero], event.xdata, side='left')
         ax.plot(time[mask_qzero],flux[mask_qzero]/np.median(flux[mask]),".",color="gray",alpha=0.3)
@@ -142,6 +158,7 @@ def oncpaint(event):
         pind[0]=ind
 
     elif event.key == "M":
+        ax2.clear()
         ax.clear()            
         ind = pind[0]+1
         pind[0] = ind
@@ -165,7 +182,9 @@ def oncpaint(event):
     elif event.key == "d":
         xlim=ax.get_xlim()
         ylim=ax.get_ylim()
-        ax.clear()            
+        ax.clear() 
+        ax2.clear()
+           
         ax.set_xlim(xlim)
         ax.set_ylim(ylim)
 
@@ -179,6 +198,8 @@ def oncpaint(event):
         pind[0]=ind
     elif event.key == "D":
         ax.clear()            
+        ax2.clear()
+
         ind = pind[0]+1
         pind[0] = ind
         ax.plot(time[mask],flux[mask]/np.median(flux[mask]),".")
@@ -208,6 +229,8 @@ def oncpaint(event):
 
         ax2.title.set_text('Difference Image at t='+str(round(time[mask][ind])))
     elif event.key == "y":
+        ax2.clear()
+
         if diffind[0] < 0:
             xlim=ax.get_xlim()
             ylim=ax.get_ylim()
@@ -247,6 +270,8 @@ def oncpaint(event):
             diffind[0]=-1
             diffind[1]=-1
     elif event.key == "Y":
+        ax2.clear()
+
         if diffind[0] == -1:
             xlim=ax.get_xlim()
             ylim=ax.get_ylim()
@@ -286,6 +311,8 @@ def oncpaint(event):
             ax.axvline(time[mask][pdiffind[0]],color="red")            
             ax.axvline(time[mask][diffind[1]],ls="dashed",color="blue")
     elif event.key == "t":
+        ax2.clear()
+
         if diffrangeind[0] < 0:
             xlim=ax.get_xlim()
             ylim=ax.get_ylim()
@@ -387,10 +414,9 @@ def oncpaint(event):
             ax.set_ylim(ylim)
             for i in range(0,6):
                 diffrangeind[i]=-1
-
-            
-            
     else:
+        ax2.clear()
+
         if event.key=="l" and not logsw[0]:
             logsw[0]=True
         elif event.key=="l" and logsw[0]:
@@ -493,6 +519,7 @@ if __name__ == "__main__":
         time = f["LC"]["TIME"].value
         flux_orig = f["LC"]["SAP_FLUX"].value
         quality = f["LC"]["QUALITY"].value
+
         tpft=f["TPF"]["TIME"].value
         cnts=f["TPF"]["ROW_CNTS"].value
         medcnts=(np.median(cnts,axis=0))
