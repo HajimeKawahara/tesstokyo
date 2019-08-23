@@ -53,6 +53,8 @@ def explanation():
     exp.append("PRESS KEY IN THE LEFT BOTTOM PANEL")
     exp.append("z: use as aperture (Z: use default)")
     exp.append("x: use as background (X: use default)")
+    exp.append("C: checking inverse cross background,")
+    exp.append("   Push again for 90 deg rot")
     exp.append("v: do not use")
     exp.append("b: compare")
     exp.append("l: switch log/linear color")
@@ -85,7 +87,6 @@ def adaptive_bkgmask(diff,crit=3):
 
 def oncpaint(event):
 
-
     ix=int(event.xdata+0.5)
     iy=int(event.ydata+0.5)
     if event.key == "z":
@@ -107,7 +108,21 @@ def oncpaint(event):
             maskbkg[i]=maskbkgc[i]
             if maskbkgc[i]:
                 masklc[i]=False
-#        masklc[maskbkgc]=False
+    elif event.key=="C":
+        crossbkgmask=np.array([[True,True,True,True,True,True,True,True,True,True,True,True,True],[True,True,True,True,True,True,True,True,True,True,True,True,True],[True,True,True,True,True,True,True,True,True,True,True,True,True],[True,True,True,True,True,True,True,True,True,True,True,True,True],[True,True,True,True,True,True,True,True,True,True,True,True,True],[True,True,True,True,True,True,True,True,True,True,True,True,True],[True,True,True,True,True,True,False,False,False,False,False,False,False],[False,False,False,False,False,False,False,False,False,False,False,False,False],[False,False,False,False,False,False,False,False,False,False,False,False,False],[False,False,False,False,False,False,False,False,False,False,False,False,False],[False,False,False,False,False,False,False,False,False,False,False,False,False],[False,False,False,False,False,False,False,False,False,False,False,False,False],[False,False,False,False,False,False,False,False,False,False,False,False,False]])
+        if swicb[0]:
+            crossbkgmask=(crossbkgmask).T
+            swicb[0]=False
+        else:
+            swicb[0]=-1
+            swicb[0]=True
+        cbm=crossbkgmask.reshape(nx*ny).astype(np.bool)
+        icbm=np.invert(cbm)
+                    
+        for i in range(len(masklc)):
+            masklc[i]=cbm[i] and maskbkgc[i]
+        for i in range(len(maskbkg)):
+            maskbkg[i]=icbm[i] and maskbkgc[i]
         
     #setting pixel panel
     if event.key == "p":
@@ -452,9 +467,16 @@ def oncpaint(event):
     lc=np.sum(cntsf[:,masklc],axis=1)
     if nbkg>0:
         ax4.clear()
+
         bkg=np.sum(cntsf[:,maskbkg],axis=1)
+        #### smooth bkg XXX ###
+        smtbkg=medfilt(bkg,kernel_size=151)
         lc = lc - bkg/nbkg*nlc
+        #lc = lc - smtbkg/nbkg*nlc
+        
         ax4.plot(tpft[mask],bkg[mask],".",label="background")
+        ax4.plot(tpft[mask],smtbkg[mask],".",label="background")
+
         ax4.legend()
     if  nlc>0:
         ax3.clear()
@@ -462,9 +484,16 @@ def oncpaint(event):
         ax3.legend()
 
     if event.key == "b":
+        xlim=ax.get_xlim()
+        ylim=ax.get_ylim()
         ax.clear()
-        ax.plot(time[mask],flux[mask]/np.median(flux[mask]),".")
-        ax.plot(time[mask],lc[mask]/np.median(lc[mask]),".")
+
+        ax.plot(time[mask],flux[mask]/np.abs(np.median(flux[mask])),".",label="original")
+        ax.plot(time[mask],lc[mask]/np.abs(np.median(lc[mask])),".",label="new aperture")
+#        ax.set_xlim(xlim)
+#        ax.set_ylim(ylim)
+
+        ax.legend()
         ax.title.set_text("STD = "+str(np.std(lc[mask]/np.median(lc[mask]))))
     if event.key == "1":
         ax.clear()
@@ -492,7 +521,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='QL for TESS (h5)')
     parser.add_argument('-f', nargs=1, default=[""], help='tic', type=str)
     parser.add_argument('-n', help='do not connect mysql server', action='store_true')
-
+    swicb=[False]
     expl=explanation()
     for line in expl:
         print(line)
@@ -612,9 +641,11 @@ if __name__ == "__main__":
     ax=fig.add_subplot(211)
     ax.title.set_text("qlh5 (*_*)/ "+" File: "+tagn)
 #    ax.plot(time,quality)
-    ax.plot(time[mask],flux_orig[mask]/np.median(flux_orig[mask]),".",label="LC (original)",color="C1",alpha=0.2)
-    ax.plot(time[mask_qzero],flux[mask_qzero]/np.median(flux[mask]),".",color="gray",alpha=0.5)
-    ax.plot(time[mask],flux[mask]/np.median(flux[mask]),".",label=tagn,color="C0")
+
+
+    ax.plot(time[mask],flux_orig[mask]/np.abs(np.median(flux_orig[mask])),".",label="LC (original)",color="C1",alpha=0.2)
+    ax.plot(time[mask_qzero],flux[mask_qzero]/np.abs(np.median(flux[mask])),".",color="gray",alpha=0.5)
+    ax.plot(time[mask],flux[mask]/np.abs(np.median(flux[mask])),".",label=tagn,color="C0")
     ax.title.set_text(tagn)
     ax.legend()
 
