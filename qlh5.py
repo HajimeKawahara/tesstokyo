@@ -86,6 +86,8 @@ def adaptive_bkgmask(diff,crit=3):
 def oncpaint(event):
 
 
+
+    ######### PIXEL PANEL #####
     ix=int(event.xdata+0.5)
     iy=int(event.ydata+0.5)
     if event.key == "z":
@@ -107,9 +109,20 @@ def oncpaint(event):
             maskbkg[i]=maskbkgc[i]
             if maskbkgc[i]:
                 masklc[i]=False
-#        masklc[maskbkgc]=False
+                #        masklc[maskbkgc]=False
+
+    ######### bottom panel ############
+    if event.key == "B":
+        ax4.clear()
+        #XXX
+        cbkgx=np.sum(pixpos[maskbkg,0]*cntsf[:,maskbkg],axis=1)
+        cbkgy=np.sum(pixpos[maskbkg,1]*cntsf[:,maskbkg],axis=1)
+
         
+
+    ######### LC PANEL #####
     #setting pixel panel
+    #pk m/M d/D y/Y t 1 b l h B
     if event.key == "p":
         ax2.clear()
         ax.clear()
@@ -120,7 +133,6 @@ def oncpaint(event):
 
         ax2.imshow(np.log10(cnts[mask][ind]))
         ax2.title.set_text('Log color Image at t='+str(round(time[mask][ind])))
-
     elif event.key == "k":
         xlim=ax.get_xlim()
         ylim=ax.get_ylim()
@@ -526,6 +538,10 @@ if __name__ == "__main__":
         ap=f["APERTURE_MASK"]["FLUX"].value
         apbkg=f["APERTURE_MASK"]["FLUX_BKG"].value
 
+        #### ap position
+        
+
+        
     #######################################
     nt=cnts.shape[0]
     nx=cnts.shape[1]

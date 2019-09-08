@@ -12,9 +12,9 @@ import sys
 #Seq|Star|RAJ2000|DEJ2000|Dist|n_Dist|Age|Hmag|SpType|MA|l_MB|MB|l_rho|rho|l_Per|Per|x_Per|l_Ecc|Ecc|l_acrit|acrit|Ref|SimbadName
 
 telpos={}
-telpos["Subaru"]=[19.828611,155.48055,4139.]
-telpos["Ishigaki"]=[24.3666,124.1333,197.]
-
+telpos["Subaru"]=[19.828611,360.0-155.48055,4139.,-10.0]
+telpos["Ishigaki"]=[24.3666,124.1333,197.,9.0]
+telpos["Kiso"]=[35.7972222,137.6254166,1130.0,9.0]
 
 
 def is_float_expression(s):
@@ -31,11 +31,13 @@ if __name__ == "__main__":
     parser.add_argument('-p', nargs=3, help='Manual latitude/longitude/height(m) of the observatory.',type=float)
     parser.add_argument('-t', nargs=1, help='Telescope name Subaru,Ishigaki',type=str)
 
-    parser.add_argument('-d', nargs=1, default=["2019-7-20"],help='observation date',type=str)
-    parser.add_argument('-ra', nargs=1, help='ra (deg)',type=float)
-    parser.add_argument('-dec', nargs=1, help='dec (deg)',type=float)
+    parser.add_argument('-d', nargs=1, default=["2019-9-8"],help='observation date',type=str)
+    parser.add_argument('-r', nargs=1, help='ra dec',type=str)
 
     args = parser.parse_args()
+    radec = args.r[0]
+    print(radec)
+    
     maxalt = args.a[0]#30.0 #maximum altitude
 
     if args.p:
@@ -43,14 +45,14 @@ if __name__ == "__main__":
         lon=args.p[1]#155.0 + 28/60.0 + 50/3600.0 
         height = args.p[2]#4139.0
     elif args.t:
-        lat,lon,height=telpos[args.t[0]]
+        lat,lon,height,offt=telpos[args.t[0]]
     else:
         sys.exit("Provide the telescope name or position.")
         
-    utcoffset = - 10.0*u.hour
+    utcoffset = -offt*u.hour
     midlocal=Time(args.d[0])+(1*u.d)
     midnight = midlocal + utcoffset
-
+    print("Midnight (UT)=",midnight)
 
     print(midlocal.iso)
     location=EarthLocation(lat=lat*u.deg, lon=lon*u.deg, height=height*u.m)
@@ -72,11 +74,12 @@ if __name__ == "__main__":
     ic=0
     lsarr=["solid","dashed","dotted","solid","dashed","dotted","solid","dashed","dotted","solid","dashed","dotted","solid","dashed","dotted","solid","dashed","dotted","solid","dashed","dotted","solid","dashed","dotted"]
 
-    for i,name in enumerate(args.ra):
+    for i,name in enumerate(args.r):
 
-        ra=str(args.ra[i])
-        dec=str(args.dec[i])
-        c = SkyCoord(ra+" "+dec, unit=(u.deg, u.deg))
+        if len(radec.split(":"))>1:
+            c = SkyCoord(radec, unit=(u.hourangle, u.deg))
+        else:
+            c = SkyCoord(radec, unit=(u.deg, u.deg))
         
         altitude = c.transform_to(frame)
         iic=np.mod(ic,7)
