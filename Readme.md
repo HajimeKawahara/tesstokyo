@@ -12,7 +12,7 @@ python qlh5.py -f test.h5
 
 
 ```
-python elevradec.py -d 2019-11-16 -t Ishigaki -ra 118.02 -dec -20.46
+python elevradec.py -d 2019-11-16 -t Ishigaki -r  '02:24:51.072 +30:38:44.71' 
 ```
 
 ### vih5.py -- for Visual Inspection (png files)
