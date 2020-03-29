@@ -522,7 +522,7 @@ def oncpaint(event):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='QL for TESS (h5)')
-    parser.add_argument('-f', nargs=1, default=[""], help='tic', type=str)
+    parser.add_argument('-f', nargs=1, default=[""], help='h5 file', type=str)
     parser.add_argument('-n', help='do not connect mysql server', action='store_true')
     swicb=[False]
     expl=explanation()
@@ -545,9 +545,10 @@ if __name__ == "__main__":
             #OLD format
             chip=f["header"]["CCD"].value
         
-        tagn=str(TID)+"_"+str(sector)+"_"+str(camera)+"_"+str(chip)
-        #x = f["header"]["cx"].value
-        #y = f["header"]["cy"].value
+        ffix0 = f["header"]["x"].value
+        ffiy0 = f["header"]["y"].value
+        tagn=str(TID)+"_"+str(sector)+"_"+str(camera)+"_"+str(chip)+" FFI: x="+str(ffix0)+" y="+str(ffiy0)
+
         time = f["LC"]["TIME"].value
         flux_orig = f["LC"]["SAP_FLUX"].value
         quality = f["LC"]["QUALITY"].value
@@ -628,7 +629,7 @@ if __name__ == "__main__":
     # set masks
     #
     #############################################
-    mask = mask_qzero*mask_asteroid
+    mask = mask_qzero#*mask_asteroid
 
 
     print("FLUX ORIGINAL STD",np.std(flux_orig[mask]/np.median(flux_orig[mask])))
